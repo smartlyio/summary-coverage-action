@@ -12939,7 +12939,7 @@ async function publishCheck(opts) {
         name: 'Coverage',
         head_sha: sha,
         status: 'completed',
-        conclusion: 'completed',
+        conclusion: 'success',
         output: {
             title: `Total branch coverage ${totalCoverage.toFixed(2)}`,
             summary: ''
