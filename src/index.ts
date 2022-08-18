@@ -39,7 +39,7 @@ async function publishCheck(opts: {
   const octokit = github.getOctokit(opts.token);
 
   const totalCoverage = (opts.totals.covered / opts.totals.total) * 100;
-  await octokit.rest.checks.create({
+  const output = {
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
     name: 'Coverage',
@@ -51,7 +51,9 @@ async function publishCheck(opts: {
       summary: ''
     },
     details_url: opts.detailsUrl
-  });
+  };
+  console.log(output);
+  await octokit.rest.checks.create(output);
 }
 
 function totalFromFile(file: string) {
