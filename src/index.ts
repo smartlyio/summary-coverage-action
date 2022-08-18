@@ -47,10 +47,9 @@ async function publishCheck(opts: {
     status: 'completed',
     conclusion: 'success',
     output: {
-      title: `Total branch coverage ${totalCoverage.toFixed(2)}`,
-      summary: ''
-    },
-    details_url: opts.detailsUrl
+      title: `Coverage report`,
+      summary: 'Branch coverage [${totalCoverage.toFixed(2)}](${opts.detailsUrl})'
+    }
   };
   console.log(output);
   await octokit.rest.checks.create(output);
