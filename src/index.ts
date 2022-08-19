@@ -42,18 +42,14 @@ async function publishCheck(opts: {
   const output = {
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
-    name: 'Coverage',
-    head_sha: sha,
-    status: 'completed',
-    conclusion: 'success',
-    output: {
-      title: `Total branch coverage ${totalCoverage.toFixed(2)}`,
-      summary: ''
-    },
-    details_url: opts.detailsUrl
+    context: 'Coverage',
+    sha,
+    state: 'success' as const,
+    description: `Total branch coverage ${totalCoverage.toFixed(2)}`,
+    target_url: opts.detailsUrl
   };
   console.log(output);
-  await octokit.rest.checks.create(output);
+  await octokit.rest.repos.createCommitStatus(output);
 }
 
 function totalFromFile(file: string) {
