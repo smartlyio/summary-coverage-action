@@ -12939,7 +12939,7 @@ async function publishCheck(opts) {
         context: 'Coverage',
         sha,
         state: 'success',
-        description: `Total branch coverage ${totalCoverage.toFixed(2)}`,
+        description: `Total branch coverage ${totalCoverage.toFixed(2)}%`,
         target_url: opts.detailsUrl
     };
     console.log(output);
