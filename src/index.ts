@@ -48,7 +48,6 @@ async function publishCheck(opts: {
     description: `Total branch coverage ${totalCoverage.toFixed(2)}%`,
     target_url: opts.detailsUrl
   };
-  console.log(output);
   await octokit.rest.repos.createCommitStatus(output);
 }
 
