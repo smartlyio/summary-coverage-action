@@ -2,13 +2,16 @@ import * as core from '@actions/core';
 import * as github from '@actions/github';
 
 const coverageFileArgument = 'coverage-file';
+const coverageModeArgument = 'coverage-mode';
 const reportUrl = 'report-url';
 const ghToken = 'github-token';
 
 async function run() {
   const coverageFile = core.getInput(coverageFileArgument);
+  const coverageMode = core.getInput(coverageModeArgument);
   const totals = calculateTotal({
-    coverage: coverageFile
+    coverage: coverageFile,
+    mode: coverageMode
   });
   await publishCheck({
     detailsUrl: core.getInput(reportUrl),
@@ -20,10 +23,10 @@ import * as fs from 'fs';
 import * as assert from 'assert';
 import * as glob from 'glob';
 
-function calculateTotal(opts: { coverage: string }) {
+function calculateTotal(opts: { coverage: string, mode: string }) {
   return glob.sync(opts.coverage).reduce(
     (memo, file) => {
-      const total = totalFromFile(file);
+      const total = totalFromFile(file, opts.mode);
       return { total: memo.total + total.total, covered: memo.covered + total.covered };
     },
     { total: 0, covered: 0 }
@@ -51,11 +54,11 @@ async function publishCheck(opts: {
   await octokit.rest.repos.createCommitStatus(output);
 }
 
-function totalFromFile(file: string) {
+function totalFromFile(file: string, mode: string) {
   assert(/\.json$/.test(file), `Coverage file '${file}' should be (jest) json formatted`);
   const coverage = JSON.parse(fs.readFileSync(file, 'utf8'));
-  const covered = coverage.total.branches?.covered ?? 0;
-  const total = coverage.total.branches?.total ?? 0;
+  const covered = coverage.total[mode]?.covered ?? 0;
+  const total = coverage.total[mode]?.total ?? 0;
   return { covered, total };
 }
 

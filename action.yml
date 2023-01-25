@@ -4,6 +4,10 @@ inputs:
   coverage-file:
     description: summary coverage json file (glob)
     required: true
+  coverage-mode:
+    description: which type of coverage is reported (branches, functions, statements, lines)
+    default: 'branches'
+    required: false
   github-token:
     description: github token for octokit
     required: true
