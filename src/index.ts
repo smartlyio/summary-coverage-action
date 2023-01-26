@@ -16,12 +16,20 @@ async function run() {
   await publishCheck({
     detailsUrl: core.getInput(reportUrl),
     totals,
+    coverageMode,
     token: core.getInput(ghToken)
   });
 }
 import * as fs from 'fs';
 import * as assert from 'assert';
 import * as glob from 'glob';
+
+const coverageTypeSingular = {
+  branches: 'branch',
+  functions: 'function',
+  lines: 'line',
+  statements: 'statement'
+}
 
 function calculateTotal(opts: { coverage: string, mode: string }) {
   return glob.sync(opts.coverage).reduce(
@@ -37,6 +45,7 @@ async function publishCheck(opts: {
   detailsUrl: string;
   totals: { covered: number; total: number };
   token: string;
+  coverageMode: string;
 }) {
   const sha = github.context.payload.pull_request?.head?.sha || github.context.sha;
   const octokit = github.getOctokit(opts.token);
@@ -48,7 +57,7 @@ async function publishCheck(opts: {
     context: 'Coverage',
     sha,
     state: 'success' as const,
-    description: `Total branch coverage ${totalCoverage.toFixed(2)}%`,
+    description: `Total ${coverageTypeSingular[opts.coverageMode] || opts.coverageMode} coverage ${totalCoverage.toFixed(2)}%`,
     target_url: opts.detailsUrl
   };
   await octokit.rest.repos.createCommitStatus(output);
