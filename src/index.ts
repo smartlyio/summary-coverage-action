@@ -24,13 +24,6 @@ import * as fs from 'fs';
 import * as assert from 'assert';
 import * as glob from 'glob';
 
-const coverageTypeSingular = {
-  branches: 'branch',
-  functions: 'function',
-  lines: 'line',
-  statements: 'statement'
-}
-
 function calculateTotal(opts: { coverage: string, mode: string }) {
   return glob.sync(opts.coverage).reduce(
     (memo, file) => {
@@ -57,7 +50,7 @@ async function publishCheck(opts: {
     context: 'Coverage',
     sha,
     state: 'success' as const,
-    description: `Total ${coverageTypeSingular[opts.coverageMode] || opts.coverageMode} coverage ${totalCoverage.toFixed(2)}%`,
+    description: `${totalCoverage.toFixed(2)}% of ${opts.coverageMode} covered by tests`,
     target_url: opts.detailsUrl
   };
   await octokit.rest.repos.createCommitStatus(output);
