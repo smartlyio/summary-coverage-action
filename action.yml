@@ -19,5 +19,5 @@ inputs:
     description: url to detailed coverage report
     required: true
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'dist/index.js'
