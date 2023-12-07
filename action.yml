@@ -2,7 +2,7 @@ name: 'Summary coverage check'
 description: 'creates a check with link to coverage report url'
 inputs:
   coverage-file:
-    description: summary coverage json file (glob)
+    description: summary coverage json file
     required: true
   coverage-format:
     description: format of the coverage file (istanbul, summary)
