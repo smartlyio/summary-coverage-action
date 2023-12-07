@@ -9,7 +9,7 @@ add following to your steps after the step running your test suite
 ```
     - uses: smartlyio/summary-coverage-action
       with:
-        coverage-file: packages/*/coverage/coverage.json
+        coverage-file: coverage.json
         reportUrl: http://example.com/report/index.html
         github-token: ${{secrets.GITHUB_TOKEN}}
 ```
@@ -21,4 +21,3 @@ with option.
 ```
 coverageReporters: ['json-summary']
 ```
-

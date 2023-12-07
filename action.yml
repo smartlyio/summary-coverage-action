@@ -4,6 +4,10 @@ inputs:
   coverage-file:
     description: summary coverage json file (glob)
     required: true
+  coverage-format:
+    description: format of the coverage file (istanbul, summary)
+    default: 'istanbul'
+    required: false
   coverage-mode:
     description: which type of coverage is reported (branches, functions, statements, lines)
     default: 'branches'
