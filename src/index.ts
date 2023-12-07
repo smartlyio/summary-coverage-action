@@ -24,7 +24,7 @@ import * as fs from 'fs';
 import * as assert from 'assert';
 import * as glob from 'glob';
 
-function calculateTotal(opts: { coverage: string, mode: string }) {
+function calculateTotal(opts: { coverage: string; mode: string }) {
   return glob.sync(opts.coverage).reduce(
     (memo, file) => {
       const total = totalFromFile(file, opts.mode);
