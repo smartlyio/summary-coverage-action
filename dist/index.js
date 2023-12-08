@@ -12906,16 +12906,20 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __nccwpck_require__(2186);
 const github = __nccwpck_require__(5438);
 const coverageFileArgument = 'coverage-file';
+const coverageModeArgument = 'coverage-mode';
 const reportUrl = 'report-url';
 const ghToken = 'github-token';
 async function run() {
     const coverageFile = core.getInput(coverageFileArgument);
+    const coverageMode = core.getInput(coverageModeArgument);
     const totals = calculateTotal({
-        coverage: coverageFile
+        coverage: coverageFile,
+        mode: coverageMode
     });
     await publishCheck({
         detailsUrl: core.getInput(reportUrl),
         totals,
+        coverageMode,
         token: core.getInput(ghToken)
     });
 }
@@ -12924,7 +12928,7 @@ const assert = __nccwpck_require__(9491);
 const glob = __nccwpck_require__(1957);
 function calculateTotal(opts) {
     return glob.sync(opts.coverage).reduce((memo, file) => {
-        const total = totalFromFile(file);
+        const total = totalFromFile(file, opts.mode);
         return { total: memo.total + total.total, covered: memo.covered + total.covered };
     }, { total: 0, covered: 0 });
 }
@@ -12939,17 +12943,17 @@ async function publishCheck(opts) {
         context: 'Coverage',
         sha,
         state: 'success',
-        description: `Total branch coverage ${totalCoverage.toFixed(2)}%`,
+        description: `${totalCoverage.toFixed(2)}% of ${opts.coverageMode} covered by tests`,
         target_url: opts.detailsUrl
     };
     await octokit.rest.repos.createCommitStatus(output);
 }
-function totalFromFile(file) {
+function totalFromFile(file, mode) {
     var _a, _b, _c, _d;
     assert(/\.json$/.test(file), `Coverage file '${file}' should be (jest) json formatted`);
     const coverage = JSON.parse(fs.readFileSync(file, 'utf8'));
-    const covered = (_b = (_a = coverage.total.branches) === null || _a === void 0 ? void 0 : _a.covered) !== null && _b !== void 0 ? _b : 0;
-    const total = (_d = (_c = coverage.total.branches) === null || _c === void 0 ? void 0 : _c.total) !== null && _d !== void 0 ? _d : 0;
+    const covered = (_b = (_a = coverage.total[mode]) === null || _a === void 0 ? void 0 : _a.covered) !== null && _b !== void 0 ? _b : 0;
+    const total = (_d = (_c = coverage.total[mode]) === null || _c === void 0 ? void 0 : _c.total) !== null && _d !== void 0 ? _d : 0;
     return { covered, total };
 }
 void run();
