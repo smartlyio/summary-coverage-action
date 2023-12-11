@@ -1,37 +1,62 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
+import * as fs from 'fs/promises';
+import { CoverageSummary, createCoverageMap, createCoverageSummary } from 'istanbul-lib-coverage';
+import * as assert from 'assert';
 
 const coverageFileArgument = 'coverage-file';
 const coverageModeArgument = 'coverage-mode';
 const reportUrl = 'report-url';
 const ghToken = 'github-token';
 
+function assertCoverageMode(
+  mode: string
+): asserts mode is 'statements' | 'branches' | 'functions' | 'lines' {
+  if (!['statements', 'branches', 'functions', 'lines'].includes(mode)) {
+    throw new Error(`Invalid coverage mode '${mode}'`);
+  }
+}
+
+async function generateSummary(file: string): Promise<CoverageSummary> {
+  const map = createCoverageMap({});
+  const summary = createCoverageSummary();
+  map.merge(JSON.parse(await fs.readFile(file, { encoding: 'utf-8' })));
+  map.files().forEach(file => {
+    const fileCoverage = map.fileCoverageFor(file);
+    const fileSummary = fileCoverage.toSummary();
+    summary.merge(fileSummary);
+  });
+
+  return summary;
+}
+
+async function loadSummary(file: string): Promise<CoverageSummary> {
+  const summary = JSON.parse(await fs.readFile(file, { encoding: 'utf-8' }));
+  assert(summary.total, `Coverage file '${file}' is not a coverage summary file`);
+  return createCoverageSummary(summary.total);
+}
+
 async function run() {
   const coverageFile = core.getInput(coverageFileArgument);
+  const coverageFormat = core.getInput(coverageFileArgument);
   const coverageMode = core.getInput(coverageModeArgument);
-  const totals = calculateTotal({
-    coverage: coverageFile,
-    mode: coverageMode
-  });
+
+  assertCoverageMode(coverageMode);
+
+  let summary: CoverageSummary;
+  if (coverageFormat === 'summary') {
+    summary = await loadSummary(coverageFile);
+  } else {
+    summary = await generateSummary(coverageFile);
+  }
+
+  const totals = coverageTotals(summary, coverageMode);
   await publishCheck({
     detailsUrl: core.getInput(reportUrl),
     totals,
     coverageMode,
     token: core.getInput(ghToken)
   });
-}
-import * as fs from 'fs';
-import * as assert from 'assert';
-import * as glob from 'glob';
-
-function calculateTotal(opts: { coverage: string; mode: string }) {
-  return glob.sync(opts.coverage).reduce(
-    (memo, file) => {
-      const total = totalFromFile(file, opts.mode);
-      return { total: memo.total + total.total, covered: memo.covered + total.covered };
-    },
-    { total: 0, covered: 0 }
-  );
 }
 
 async function publishCheck(opts: {
@@ -56,11 +81,12 @@ async function publishCheck(opts: {
   await octokit.rest.repos.createCommitStatus(output);
 }
 
-function totalFromFile(file: string, mode: string) {
-  assert(/\.json$/.test(file), `Coverage file '${file}' should be (jest) json formatted`);
-  const coverage = JSON.parse(fs.readFileSync(file, 'utf8'));
-  const covered = coverage.total[mode]?.covered ?? 0;
-  const total = coverage.total[mode]?.total ?? 0;
+function coverageTotals(
+  coverage: CoverageSummary,
+  mode: 'statements' | 'branches' | 'functions' | 'lines'
+) {
+  const covered = coverage[mode]?.covered ?? 0;
+  const total = coverage[mode]?.total ?? 0;
   return { covered, total };
 }
 

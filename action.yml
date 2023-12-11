@@ -2,8 +2,12 @@ name: 'Summary coverage check'
 description: 'creates a check with link to coverage report url'
 inputs:
   coverage-file:
-    description: summary coverage json file (glob)
+    description: Coverage file to parse
     required: true
+  coverage-format:
+    description: format of the coverage file (istanbul, summary)
+    default: 'istanbul'
+    required: false
   coverage-mode:
     description: which type of coverage is reported (branches, functions, statements, lines)
     default: 'branches'
@@ -15,5 +19,5 @@ inputs:
     description: url to detailed coverage report
     required: true
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'dist/index.js'
