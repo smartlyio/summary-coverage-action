@@ -10316,6 +10316,38 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
+/***/ 2553:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.loadSummary = exports.generateSummary = void 0;
+const fs = __nccwpck_require__(3977);
+const istanbul_lib_coverage_1 = __nccwpck_require__(3896);
+const assert = __nccwpck_require__(8061);
+async function generateSummary(file) {
+    const map = (0, istanbul_lib_coverage_1.createCoverageMap)({});
+    const summary = (0, istanbul_lib_coverage_1.createCoverageSummary)();
+    map.merge(JSON.parse(await fs.readFile(file, { encoding: 'utf-8' })));
+    map.files().forEach(file => {
+        const fileCoverage = map.fileCoverageFor(file);
+        const fileSummary = fileCoverage.toSummary();
+        summary.merge(fileSummary);
+    });
+    return summary;
+}
+exports.generateSummary = generateSummary;
+async function loadSummary(file) {
+    const summary = JSON.parse(await fs.readFile(file, { encoding: 'utf-8' }));
+    assert(summary.total, `Coverage file '${file}' is not a coverage summary file`);
+    return (0, istanbul_lib_coverage_1.createCoverageSummary)(summary.total);
+}
+exports.loadSummary = loadSummary;
+
+
+/***/ }),
+
 /***/ 2877:
 /***/ ((module) => {
 
@@ -10356,14 +10388,6 @@ module.exports = require("fs");
 
 /***/ }),
 
-/***/ 3292:
-/***/ ((module) => {
-
-"use strict";
-module.exports = require("fs/promises");
-
-/***/ }),
-
 /***/ 3685:
 /***/ ((module) => {
 
@@ -10385,6 +10409,22 @@ module.exports = require("https");
 
 "use strict";
 module.exports = require("net");
+
+/***/ }),
+
+/***/ 8061:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:assert");
+
+/***/ }),
+
+/***/ 3977:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:fs/promises");
 
 /***/ }),
 
@@ -10507,9 +10547,7 @@ var exports = __webpack_exports__;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __nccwpck_require__(2186);
 const github = __nccwpck_require__(5438);
-const fs = __nccwpck_require__(3292);
-const istanbul_lib_coverage_1 = __nccwpck_require__(3896);
-const assert = __nccwpck_require__(9491);
+const summary_1 = __nccwpck_require__(2553);
 const coverageFileArgument = 'coverage-file';
 const coverageModeArgument = 'coverage-mode';
 const reportUrl = 'report-url';
@@ -10519,22 +10557,6 @@ function assertCoverageMode(mode) {
         throw new Error(`Invalid coverage mode '${mode}'`);
     }
 }
-async function generateSummary(file) {
-    const map = (0, istanbul_lib_coverage_1.createCoverageMap)({});
-    const summary = (0, istanbul_lib_coverage_1.createCoverageSummary)();
-    map.merge(JSON.parse(await fs.readFile(file, { encoding: 'utf-8' })));
-    map.files().forEach(file => {
-        const fileCoverage = map.fileCoverageFor(file);
-        const fileSummary = fileCoverage.toSummary();
-        summary.merge(fileSummary);
-    });
-    return summary;
-}
-async function loadSummary(file) {
-    const summary = JSON.parse(await fs.readFile(file, { encoding: 'utf-8' }));
-    assert(summary.total, `Coverage file '${file}' is not a coverage summary file`);
-    return (0, istanbul_lib_coverage_1.createCoverageSummary)(summary.total);
-}
 async function run() {
     const coverageFile = core.getInput(coverageFileArgument);
     const coverageFormat = core.getInput(coverageFileArgument);
@@ -10542,10 +10564,10 @@ async function run() {
     assertCoverageMode(coverageMode);
     let summary;
     if (coverageFormat === 'summary') {
-        summary = await loadSummary(coverageFile);
+        summary = await (0, summary_1.loadSummary)(coverageFile);
     }
     else {
-        summary = await generateSummary(coverageFile);
+        summary = await (0, summary_1.generateSummary)(coverageFile);
     }
     const totals = coverageTotals(summary, coverageMode);
     await publishCheck({
