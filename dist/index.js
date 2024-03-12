@@ -10773,20 +10773,22 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __nccwpck_require__(2186);
 const github = __nccwpck_require__(5438);
 const summary_1 = __nccwpck_require__(2553);
-const coverageFileArgument = 'coverage-file';
-const coverageModeArgument = 'coverage-mode';
-const reportUrl = 'report-url';
-const ghToken = 'github-token';
+function assertCoverageFormat(mode) {
+    if (!['istanbul', 'lcov', 'summary'].includes(mode)) {
+        throw new Error(`Invalid coverage format: '${mode}'`);
+    }
+}
 function assertCoverageMode(mode) {
     if (!['statements', 'branches', 'functions', 'lines'].includes(mode)) {
-        throw new Error(`Invalid coverage mode '${mode}'`);
+        throw new Error(`Invalid coverage mode: '${mode}'`);
     }
 }
 async function run() {
-    const coverageFile = core.getInput(coverageFileArgument);
-    const coverageFormat = core.getInput(coverageFileArgument);
-    const coverageMode = core.getInput(coverageModeArgument);
+    const coverageFile = core.getInput('coverage-file', { required: true });
+    const coverageFormat = core.getInput('coverage-format');
+    const coverageMode = core.getInput('coverage-mode');
     assertCoverageMode(coverageMode);
+    assertCoverageFormat(coverageFormat);
     let summary;
     if (coverageFormat === 'summary') {
         summary = await (0, summary_1.loadSummary)(coverageFile);
@@ -10799,10 +10801,10 @@ async function run() {
     }
     const totals = coverageTotals(summary, coverageMode);
     await publishCheck({
-        detailsUrl: core.getInput(reportUrl),
+        detailsUrl: core.getInput('report-url'),
         totals,
         coverageMode,
-        token: core.getInput(ghToken)
+        token: core.getInput('github-token', { required: true })
     });
 }
 async function publishCheck(opts) {
