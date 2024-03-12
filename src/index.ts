@@ -3,11 +3,6 @@ import * as github from '@actions/github';
 import { CoverageSummary } from 'istanbul-lib-coverage';
 import { generateSummary, loadLCOV, loadSummary } from './summary';
 
-const coverageFileArgument = 'coverage-file';
-const coverageModeArgument = 'coverage-mode';
-const reportUrl = 'report-url';
-const ghToken = 'github-token';
-
 function assertCoverageMode(
   mode: string
 ): asserts mode is 'statements' | 'branches' | 'functions' | 'lines' {
@@ -17,9 +12,9 @@ function assertCoverageMode(
 }
 
 async function run() {
-  const coverageFile = core.getInput(coverageFileArgument);
-  const coverageFormat = core.getInput(coverageFileArgument);
-  const coverageMode = core.getInput(coverageModeArgument);
+  const coverageFile = core.getInput('coverage-file', { required: true });
+  const coverageFormat = core.getInput('coverage-format');
+  const coverageMode = core.getInput('coverage-mode');
 
   assertCoverageMode(coverageMode);
 
@@ -34,10 +29,10 @@ async function run() {
 
   const totals = coverageTotals(summary, coverageMode);
   await publishCheck({
-    detailsUrl: core.getInput(reportUrl),
+    detailsUrl: core.getInput('report-url'),
     totals,
     coverageMode,
-    token: core.getInput(ghToken)
+    token: core.getInput('github-token', { required: true })
   });
 }
 
