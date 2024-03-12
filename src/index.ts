@@ -3,11 +3,17 @@ import * as github from '@actions/github';
 import { CoverageSummary } from 'istanbul-lib-coverage';
 import { generateSummary, loadLCOV, loadSummary } from './summary';
 
+function assertCoverageFormat(mode: string): asserts mode is 'istanbul' | 'lcov' | 'summary' {
+  if (!['istanbul', 'lcov', 'summary'].includes(mode)) {
+    throw new Error(`Invalid coverage format: '${mode}'`);
+  }
+}
+
 function assertCoverageMode(
   mode: string
 ): asserts mode is 'statements' | 'branches' | 'functions' | 'lines' {
   if (!['statements', 'branches', 'functions', 'lines'].includes(mode)) {
-    throw new Error(`Invalid coverage mode '${mode}'`);
+    throw new Error(`Invalid coverage mode: '${mode}'`);
   }
 }
 
@@ -17,6 +23,7 @@ async function run() {
   const coverageMode = core.getInput('coverage-mode');
 
   assertCoverageMode(coverageMode);
+  assertCoverageFormat(coverageFormat);
 
   let summary: CoverageSummary;
   if (coverageFormat === 'summary') {
