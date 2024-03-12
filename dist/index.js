@@ -10562,9 +10562,11 @@ async function loadLCOV(file) {
 }
 exports.loadLCOV = loadLCOV;
 async function loadSummary(file) {
-    const summary = JSON.parse(await fs.readFile(file, { encoding: 'utf-8' }));
-    assert(summary.total, `Coverage file '${file}' is not a coverage summary file`);
-    return (0, istanbul_lib_coverage_1.createCoverageSummary)(summary.total);
+    const data = JSON.parse(await fs.readFile(file, { encoding: 'utf-8' }));
+    assert(data.total, `Coverage file '${file}' is not a coverage summary file`);
+    const summary = (0, istanbul_lib_coverage_1.createCoverageSummary)();
+    summary.merge(data.total);
+    return summary;
 }
 exports.loadSummary = loadSummary;
 

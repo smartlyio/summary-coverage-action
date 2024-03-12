@@ -47,7 +47,9 @@ export async function loadLCOV(file: string): Promise<CoverageSummary> {
 }
 
 export async function loadSummary(file: string): Promise<CoverageSummary> {
-  const summary = JSON.parse(await fs.readFile(file, { encoding: 'utf-8' }));
-  assert(summary.total, `Coverage file '${file}' is not a coverage summary file`);
-  return createCoverageSummary(summary.total);
+  const data = JSON.parse(await fs.readFile(file, { encoding: 'utf-8' }));
+  assert(data.total, `Coverage file '${file}' is not a coverage summary file`);
+  const summary = createCoverageSummary();
+  summary.merge(data.total);
+  return summary;
 }
