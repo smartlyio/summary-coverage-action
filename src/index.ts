@@ -1,8 +1,7 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
-import * as fs from 'fs/promises';
-import { CoverageSummary, createCoverageMap, createCoverageSummary } from 'istanbul-lib-coverage';
-import * as assert from 'assert';
+import { CoverageSummary } from 'istanbul-lib-coverage';
+import { generateSummary, loadSummary } from './summary';
 
 const coverageFileArgument = 'coverage-file';
 const coverageModeArgument = 'coverage-mode';
@@ -15,25 +14,6 @@ function assertCoverageMode(
   if (!['statements', 'branches', 'functions', 'lines'].includes(mode)) {
     throw new Error(`Invalid coverage mode '${mode}'`);
   }
-}
-
-async function generateSummary(file: string): Promise<CoverageSummary> {
-  const map = createCoverageMap({});
-  const summary = createCoverageSummary();
-  map.merge(JSON.parse(await fs.readFile(file, { encoding: 'utf-8' })));
-  map.files().forEach(file => {
-    const fileCoverage = map.fileCoverageFor(file);
-    const fileSummary = fileCoverage.toSummary();
-    summary.merge(fileSummary);
-  });
-
-  return summary;
-}
-
-async function loadSummary(file: string): Promise<CoverageSummary> {
-  const summary = JSON.parse(await fs.readFile(file, { encoding: 'utf-8' }));
-  assert(summary.total, `Coverage file '${file}' is not a coverage summary file`);
-  return createCoverageSummary(summary.total);
 }
 
 async function run() {
