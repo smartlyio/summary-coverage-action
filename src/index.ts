@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { CoverageSummary } from 'istanbul-lib-coverage';
-import { generateSummary, loadSummary } from './summary';
+import { generateSummary, loadLCOV, loadSummary } from './summary';
 
 const coverageFileArgument = 'coverage-file';
 const coverageModeArgument = 'coverage-mode';
@@ -26,6 +26,8 @@ async function run() {
   let summary: CoverageSummary;
   if (coverageFormat === 'summary') {
     summary = await loadSummary(coverageFile);
+  } else if (coverageFormat === 'lcov') {
+    summary = await loadLCOV(coverageFile);
   } else {
     summary = await generateSummary(coverageFile);
   }
