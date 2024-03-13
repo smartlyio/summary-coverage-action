@@ -1,10 +1,12 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { CoverageSummary } from 'istanbul-lib-coverage';
-import { generateSummary, loadLCOV, loadSummary } from './summary';
+import { generateSummary, loadCobertura, loadLCOV, loadSummary } from './summary';
 
-function assertCoverageFormat(mode: string): asserts mode is 'istanbul' | 'lcov' | 'summary' {
-  if (!['istanbul', 'lcov', 'summary'].includes(mode)) {
+type CoverageFormat = 'cobertura' | 'istanbul' | 'lcov' | 'summary';
+
+function assertCoverageFormat(mode: string): asserts mode is CoverageFormat {
+  if (!['cobertura', 'istanbul', 'lcov', 'summary'].includes(mode)) {
     throw new Error(`Invalid coverage format: '${mode}'`);
   }
 }
@@ -30,6 +32,8 @@ async function run() {
     summary = await loadSummary(coverageFile);
   } else if (coverageFormat === 'lcov') {
     summary = await loadLCOV(coverageFile);
+  } else if (coverageFormat === 'cobertura') {
+    summary = await loadCobertura(coverageFile);
   } else {
     summary = await generateSummary(coverageFile);
   }

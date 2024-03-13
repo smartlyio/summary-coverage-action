@@ -6,7 +6,8 @@ import {
   createCoverageSummary
 } from 'istanbul-lib-coverage';
 import * as assert from 'node:assert';
-import parseLCOV from 'parse-lcov';
+import parseLCOV, { LCOVRecord } from 'parse-lcov';
+import { XMLParser } from 'fast-xml-parser';
 
 export async function generateSummary(file: string): Promise<CoverageSummary> {
   const map = createCoverageMap({});
@@ -21,21 +22,22 @@ export async function generateSummary(file: string): Promise<CoverageSummary> {
   return summary;
 }
 
-export async function loadLCOV(file: string): Promise<CoverageSummary> {
+function coverageRecordsToSummary(records: LCOVRecord[]): CoverageSummary {
   const flavors = ['branches', 'functions', 'lines'] as const;
-  const map = parseLCOV(await fs.readFile(file, { encoding: 'utf-8' }));
-
   const data: CoverageSummaryData = {
     lines: { total: 0, covered: 0, skipped: 0, pct: 0 },
     statements: { total: 0, covered: 0, skipped: 0, pct: NaN },
-    branches: { total: 0, covered: 0, skipped: 0, pct: 0 },
-    functions: { total: 0, covered: 0, skipped: 0, pct: 0 }
+    branches: { total: 0, covered: 0, skipped: 0, pct: NaN },
+    functions: { total: 0, covered: 0, skipped: 0, pct: NaN }
   };
 
-  for (const file of map) {
+  for (const file of records) {
     flavors.forEach(flavor => {
-      data[flavor].total += file[flavor].found ?? 0;
-      data[flavor].covered += file[flavor].hit ?? 0;
+      console.log;
+      if (file[flavor]) {
+        data[flavor].total += file[flavor].found ?? 0;
+        data[flavor].covered += file[flavor].hit ?? 0;
+      }
     });
   }
 
@@ -43,6 +45,38 @@ export async function loadLCOV(file: string): Promise<CoverageSummary> {
     data[flavor].pct =
       data[flavor].total === 0 ? 100 : (data[flavor].covered / data[flavor].total) * 100;
   });
+  return createCoverageSummary(data);
+}
+
+export async function loadLCOV(file: string): Promise<CoverageSummary> {
+  return coverageRecordsToSummary(parseLCOV(await fs.readFile(file, { encoding: 'utf-8' })));
+}
+
+export async function loadCobertura(file: string): Promise<CoverageSummary> {
+  const parser = new XMLParser({
+    ignoreAttributes: false,
+    ignoreDeclaration: true,
+    ignorePiTags: true,
+    processEntities: false,
+    stopNodes: ['sources', 'packages']
+  });
+  const report = parser.parse(await fs.readFile(file, { encoding: 'utf-8' }));
+  const data: CoverageSummaryData = {
+    lines: {
+      total: Number(report.coverage['@_lines-valid']),
+      covered: Number(report.coverage['@_lines-covered']),
+      skipped: 0,
+      pct: Number(report.coverage['@_line-rate']) * 100
+    },
+    statements: { total: 0, covered: 0, skipped: 0, pct: NaN },
+    branches: {
+      total: Number(report.coverage['@_branches-valid']),
+      covered: Number(report.coverage['@_branches-covered']),
+      skipped: 0,
+      pct: Number(report.coverage['@_branch-rate']) * 100
+    },
+    functions: { total: 0, covered: 0, skipped: 0, pct: NaN }
+  };
   return createCoverageSummary(data);
 }
 

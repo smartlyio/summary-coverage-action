@@ -5,7 +5,7 @@ inputs:
     description: Coverage file to parse
     required: true
   coverage-format:
-    description: format of the coverage file (istanbul, lcov or summary)
+    description: format of the coverage file (istanbul, cobertura, lcov or summary)
     default: 'istanbul'
     required: false
   coverage-mode:
