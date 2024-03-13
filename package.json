@@ -1,6 +1,6 @@
 {
   "name": "summary-coverage-action",
-  "version": "2.1.2",
+  "version": "2.2.0",
   "main": "dist/index.js",
   "license": "MIT",
   "scripts": {
