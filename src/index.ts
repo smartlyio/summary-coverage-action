@@ -53,7 +53,8 @@ async function publishCheck(opts: {
   token: string;
   coverageMode: string;
 }) {
-  const sha = github.context.payload.pull_request?.head?.sha || github.context.sha;
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+  const sha: string = github.context.payload.pull_request?.head?.sha || github.context.sha;
   const octokit = github.getOctokit(opts.token);
 
   const totalCoverage = (opts.totals.covered / opts.totals.total) * 100;

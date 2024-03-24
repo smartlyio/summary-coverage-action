@@ -1,18 +1,15 @@
 import * as fs from 'node:fs/promises';
-import {
-  CoverageSummary,
-  CoverageSummaryData,
-  createCoverageMap,
-  createCoverageSummary
-} from 'istanbul-lib-coverage';
-import * as assert from 'node:assert';
+import { default as libCoverage } from 'istanbul-lib-coverage';
+import assert from 'node:assert';
 import parseLCOV, { LCOVRecord } from 'parse-lcov';
 import { XMLParser } from 'fast-xml-parser';
 
-export async function generateSummary(file: string): Promise<CoverageSummary> {
-  const map = createCoverageMap({});
-  const summary = createCoverageSummary();
-  map.merge(JSON.parse(await fs.readFile(file, { encoding: 'utf-8' })));
+export async function generateSummary(file: string): Promise<libCoverage.CoverageSummary> {
+  const map = libCoverage.createCoverageMap({});
+  const summary = libCoverage.createCoverageSummary();
+  map.merge(
+    JSON.parse(await fs.readFile(file, { encoding: 'utf-8' })) as libCoverage.CoverageMapData
+  );
   map.files().forEach(file => {
     const fileCoverage = map.fileCoverageFor(file);
     const fileSummary = fileCoverage.toSummary();
@@ -22,9 +19,9 @@ export async function generateSummary(file: string): Promise<CoverageSummary> {
   return summary;
 }
 
-function coverageRecordsToSummary(records: LCOVRecord[]): CoverageSummary {
+function coverageRecordsToSummary(records: LCOVRecord[]): libCoverage.CoverageSummary {
   const flavors = ['branches', 'functions', 'lines'] as const;
-  const data: CoverageSummaryData = {
+  const data: libCoverage.CoverageSummaryData = {
     lines: { total: 0, covered: 0, skipped: 0, pct: 0 },
     statements: { total: 0, covered: 0, skipped: 0, pct: NaN },
     branches: { total: 0, covered: 0, skipped: 0, pct: NaN },
@@ -45,14 +42,14 @@ function coverageRecordsToSummary(records: LCOVRecord[]): CoverageSummary {
     data[flavor].pct =
       data[flavor].total === 0 ? 100 : (data[flavor].covered / data[flavor].total) * 100;
   });
-  return createCoverageSummary(data);
+  return libCoverage.createCoverageSummary(data);
 }
 
-export async function loadLCOV(file: string): Promise<CoverageSummary> {
+export async function loadLCOV(file: string): Promise<libCoverage.CoverageSummary> {
   return coverageRecordsToSummary(parseLCOV(await fs.readFile(file, { encoding: 'utf-8' })));
 }
 
-export async function loadCobertura(file: string): Promise<CoverageSummary> {
+export async function loadCobertura(file: string): Promise<libCoverage.CoverageSummary> {
   const parser = new XMLParser({
     ignoreAttributes: false,
     ignoreDeclaration: true,
@@ -60,8 +57,8 @@ export async function loadCobertura(file: string): Promise<CoverageSummary> {
     processEntities: false,
     stopNodes: ['sources', 'packages']
   });
-  const report = parser.parse(await fs.readFile(file, { encoding: 'utf-8' }));
-  const data: CoverageSummaryData = {
+  const report: any = parser.parse(await fs.readFile(file, { encoding: 'utf-8' }));
+  const data: libCoverage.CoverageSummaryData = {
     lines: {
       total: Number(report.coverage['@_lines-valid']),
       covered: Number(report.coverage['@_lines-covered']),
@@ -77,13 +74,13 @@ export async function loadCobertura(file: string): Promise<CoverageSummary> {
     },
     functions: { total: 0, covered: 0, skipped: 0, pct: NaN }
   };
-  return createCoverageSummary(data);
+  return libCoverage.createCoverageSummary(data);
 }
 
-export async function loadSummary(file: string): Promise<CoverageSummary> {
+export async function loadSummary(file: string): Promise<libCoverage.CoverageSummary> {
   const data = JSON.parse(await fs.readFile(file, { encoding: 'utf-8' }));
   assert(data.total, `Coverage file '${file}' is not a coverage summary file`);
-  const summary = createCoverageSummary();
+  const summary = libCoverage.createCoverageSummary();
   summary.merge(data.total);
   return summary;
 }
