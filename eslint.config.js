@@ -1,3 +1,4 @@
+import eslintConfigPrettier from 'eslint-config-prettier';
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
 
@@ -24,5 +25,6 @@ export default tseslint.config(
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/restrict-template-expressions': 'off'
     }
-  }
+  },
+  eslintConfigPrettier
 );
