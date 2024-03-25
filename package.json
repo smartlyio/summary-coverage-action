@@ -11,7 +11,7 @@
     "clean": "rm -rf dist",
     "prebundle": "npm run clean",
     "bundle": "ncc build src/index.ts --source-map --license licenses.txt",
-    "test": "jest",
+    "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest",
     "typecheck": "tsc --noEmit",
     "version": "npm run bundle && git add -f -- dist/index.js"
   },
