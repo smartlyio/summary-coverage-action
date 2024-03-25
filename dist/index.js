@@ -12806,6 +12806,20 @@ function coverageRecordsToSummary(records) {
     });
     return istanbul_lib_coverage_default().createCoverageSummary(data);
 }
+function assertIsCoberturaReport(data) {
+    if (typeof data !== 'object' ||
+        data === null ||
+        typeof data.coverage !== 'object') {
+        throw new Error('Invalid cobertura report');
+    }
+}
+function assertCoverageSummary(data, file) {
+    if (typeof data !== 'object' ||
+        data === null ||
+        typeof data.total !== 'object') {
+        throw new Error(`Coverage file '${file}' is not a coverage summary file`);
+    }
+}
 async function loadLCOV(file) {
     return coverageRecordsToSummary((0,build/* default */.ZP)(await promises_namespaceObject.readFile(file, { encoding: 'utf-8' })));
 }
@@ -12818,6 +12832,7 @@ async function loadCobertura(file) {
         stopNodes: ['sources', 'packages']
     });
     const report = parser.parse(await promises_namespaceObject.readFile(file, { encoding: 'utf-8' }));
+    assertIsCoberturaReport(report);
     const data = {
         lines: {
             total: Number(report.coverage['@_lines-valid']),
@@ -12838,8 +12853,10 @@ async function loadCobertura(file) {
 }
 async function loadSummary(file) {
     const data = JSON.parse(await promises_namespaceObject.readFile(file, { encoding: 'utf-8' }));
+    assertCoverageSummary(data, file);
     external_node_assert_default()(data.total, `Coverage file '${file}' is not a coverage summary file`);
     const summary = istanbul_lib_coverage_default().createCoverageSummary();
+    // @ts-expect-error total is a CoverageSummaryData object, but merge type expects a CoverageSummary
     summary.merge(data.total);
     return summary;
 }

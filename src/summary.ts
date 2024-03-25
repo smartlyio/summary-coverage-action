@@ -45,6 +45,38 @@ function coverageRecordsToSummary(records: LCOVRecord[]): libCoverage.CoverageSu
   return libCoverage.createCoverageSummary(data);
 }
 
+function assertIsCoberturaReport(data: unknown): asserts data is {
+  coverage: {
+    '@_lines-valid': string;
+    '@_lines-covered': string;
+    '@_branches-covered': string;
+    '@_branches-valid': string;
+    '@_line-rate': string;
+    '@_branch-rate': string;
+  };
+} {
+  if (
+    typeof data !== 'object' ||
+    data === null ||
+    typeof (data as { coverage: unknown }).coverage !== 'object'
+  ) {
+    throw new Error('Invalid cobertura report');
+  }
+}
+
+function assertCoverageSummary(
+  data: unknown,
+  file: string
+): asserts data is { total: libCoverage.CoverageSummaryData } {
+  if (
+    typeof data !== 'object' ||
+    data === null ||
+    typeof (data as { total: unknown }).total !== 'object'
+  ) {
+    throw new Error(`Coverage file '${file}' is not a coverage summary file`);
+  }
+}
+
 export async function loadLCOV(file: string): Promise<libCoverage.CoverageSummary> {
   return coverageRecordsToSummary(parseLCOV(await fs.readFile(file, { encoding: 'utf-8' })));
 }
@@ -57,7 +89,9 @@ export async function loadCobertura(file: string): Promise<libCoverage.CoverageS
     processEntities: false,
     stopNodes: ['sources', 'packages']
   });
-  const report: any = parser.parse(await fs.readFile(file, { encoding: 'utf-8' }));
+  const report = parser.parse(await fs.readFile(file, { encoding: 'utf-8' })) as unknown;
+  assertIsCoberturaReport(report);
+
   const data: libCoverage.CoverageSummaryData = {
     lines: {
       total: Number(report.coverage['@_lines-valid']),
@@ -78,9 +112,11 @@ export async function loadCobertura(file: string): Promise<libCoverage.CoverageS
 }
 
 export async function loadSummary(file: string): Promise<libCoverage.CoverageSummary> {
-  const data = JSON.parse(await fs.readFile(file, { encoding: 'utf-8' }));
+  const data = JSON.parse(await fs.readFile(file, { encoding: 'utf-8' })) as unknown;
+  assertCoverageSummary(data, file);
   assert(data.total, `Coverage file '${file}' is not a coverage summary file`);
   const summary = libCoverage.createCoverageSummary();
+  // @ts-expect-error total is a CoverageSummaryData object, but merge type expects a CoverageSummary
   summary.merge(data.total);
   return summary;
 }
