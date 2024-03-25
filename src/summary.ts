@@ -1,7 +1,7 @@
 import * as fs from 'node:fs/promises';
 import { default as libCoverage } from 'istanbul-lib-coverage';
 import assert from 'node:assert';
-import parseLCOV, { LCOVRecord } from 'parse-lcov';
+import lcovParser, { SectionSummary } from '@friedemannsommer/lcov-parser';
 import { XMLParser } from 'fast-xml-parser';
 
 export async function generateSummary(file: string): Promise<libCoverage.CoverageSummary> {
@@ -19,7 +19,7 @@ export async function generateSummary(file: string): Promise<libCoverage.Coverag
   return summary;
 }
 
-function coverageRecordsToSummary(records: LCOVRecord[]): libCoverage.CoverageSummary {
+function coverageRecordsToSummary(records: SectionSummary[]): libCoverage.CoverageSummary {
   const flavors = ['branches', 'functions', 'lines'] as const;
   const data: libCoverage.CoverageSummaryData = {
     lines: { total: 0, covered: 0, skipped: 0, pct: 0 },
@@ -30,9 +30,8 @@ function coverageRecordsToSummary(records: LCOVRecord[]): libCoverage.CoverageSu
 
   for (const file of records) {
     flavors.forEach(flavor => {
-      console.log;
       if (file[flavor]) {
-        data[flavor].total += file[flavor].found ?? 0;
+        data[flavor].total += file[flavor].instrumented ?? 0;
         data[flavor].covered += file[flavor].hit ?? 0;
       }
     });
@@ -78,7 +77,9 @@ function assertCoverageSummary(
 }
 
 export async function loadLCOV(file: string): Promise<libCoverage.CoverageSummary> {
-  return coverageRecordsToSummary(parseLCOV(await fs.readFile(file, { encoding: 'utf-8' })));
+  return coverageRecordsToSummary(
+    await lcovParser({ from: await fs.readFile(file, { encoding: 'utf-8' }) })
+  );
 }
 
 export async function loadCobertura(file: string): Promise<libCoverage.CoverageSummary> {

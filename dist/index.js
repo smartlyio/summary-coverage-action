@@ -9102,202 +9102,6 @@ function onceStrict (fn) {
 
 /***/ }),
 
-/***/ 6508:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-var __webpack_unused_export__;
-
-
-__webpack_unused_export__ = true;
-exports.ZP = parseLCOV;
-
-var _line = __nccwpck_require__(9057);
-
-var _record = __nccwpck_require__(2010);
-
-__webpack_unused_export__ = _record.LCOVRecord;
-__webpack_unused_export__ = _record.FunctionsDetails;
-__webpack_unused_export__ = _record.BranchesDetails;
-__webpack_unused_export__ = _record.LinesDetails;
-
-var _transform = __nccwpck_require__(3225);
-
-function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
-
-function parseLCOV(string) {
-  if (string === void 0) {
-    string = "";
-  }
-
-  var lines = string.split("\n");
-  var record = (0, _record.newRecord)();
-  return lines.reduce(function (retval, line) {
-    if ((0, _line.isEnd)(line)) {
-      retval.push(_extends({}, record));
-      record = (0, _record.newRecord)();
-    } else {
-      var _parseLine = (0, _line.parseLine)(line),
-          type = _parseLine.type,
-          data = _parseLine.data;
-
-      (0, _transform.transform)(record, type, data);
-    }
-
-    return retval;
-  }, []);
-}
-
-/***/ }),
-
-/***/ 9057:
-/***/ ((__unused_webpack_module, exports) => {
-
-
-
-exports.__esModule = true;
-exports.isLineType = isLineType;
-exports.isEnd = isEnd;
-exports.parseLine = parseLine;
-var linesTypes = ["TN", "SF", "FN", "FNDA", "FNF", "FNH", "BRDA", "BRF", "BRH", "DA", "LF", "LH"];
-
-function isLineType(string) {
-  return linesTypes.includes(string);
-}
-
-function isEnd(string) {
-  return string === "end_of_record";
-}
-
-function parseLine(line) {
-  var _line$split = line.split(":"),
-      type = _line$split[0],
-      data = _line$split[1];
-
-  return {
-    type: isLineType(type) ? type : undefined,
-    data: (data != null ? data : "").split(",")
-  };
-}
-
-/***/ }),
-
-/***/ 2010:
-/***/ ((__unused_webpack_module, exports) => {
-
-
-
-exports.__esModule = true;
-exports.newRecord = newRecord;
-
-function newRecord() {
-  return {
-    title: "",
-    file: "",
-    functions: {
-      found: 0,
-      hit: 0,
-      details: []
-    },
-    branches: {
-      found: 0,
-      hit: 0,
-      details: []
-    },
-    lines: {
-      found: 0,
-      hit: 0,
-      details: []
-    }
-  };
-}
-
-/***/ }),
-
-/***/ 3225:
-/***/ ((__unused_webpack_module, exports) => {
-
-
-
-exports.__esModule = true;
-exports.transform = transform;
-var transformers = {
-  TN: function TN(record, data) {
-    record.title = data[0];
-  },
-  SF: function SF(record, data) {
-    record.file = data[0];
-  },
-  // Functions
-  FNF: function FNF(record, data) {
-    record.functions.found = parseInt(data[0]);
-  },
-  FNH: function FNH(record, data) {
-    record.functions.hit = parseInt(data[0]);
-  },
-  FN: function FN(record, data) {
-    var line = data[0],
-        name = data[1];
-    record.functions.details.push({
-      name: name,
-      line: parseInt(line)
-    });
-  },
-  FNDA: function FNDA(record, data) {
-    var hit = data[0],
-        name = data[1];
-    record.functions.details.some(function (item) {
-      if (item.name === name && item.hit === undefined) {
-        item.hit = parseInt(hit);
-        return true;
-      } else {
-        return undefined;
-      }
-    });
-  },
-  // Branches
-  BRF: function BRF(record, data) {
-    record.branches.found = parseInt(data[0]);
-  },
-  BRH: function BRH(record, data) {
-    record.branches.hit = parseInt(data[0]);
-  },
-  BRDA: function BRDA(record, data) {
-    var line = data[0],
-        block = data[1],
-        branch = data[2],
-        taken = data[3];
-    record.branches.details.push({
-      line: parseInt(line),
-      block: parseInt(block),
-      branch: parseInt(branch),
-      taken: taken === "-" ? 0 : parseInt(taken)
-    });
-  },
-  // Lines
-  LF: function LF(record, data) {
-    record.lines.found = parseInt(data[0]);
-  },
-  LH: function LH(record, data) {
-    record.lines.hit = parseInt(data[0]);
-  },
-  DA: function DA(record, data) {
-    var line = data[0],
-        hit = data[1];
-    record.lines.details.push({
-      line: parseInt(line),
-      hit: parseInt(hit)
-    });
-  }
-};
-
-function transform(record, lineType, data) {
-  if (lineType) {
-    transformers[lineType](record, data);
-  }
-}
-
-/***/ }),
-
 /***/ 4526:
 /***/ ((module) => {
 
@@ -12762,8 +12566,23 @@ var istanbul_lib_coverage_default = /*#__PURE__*/__nccwpck_require__.n(istanbul_
 ;// CONCATENATED MODULE: external "node:assert"
 const external_node_assert_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:assert");
 var external_node_assert_default = /*#__PURE__*/__nccwpck_require__.n(external_node_assert_namespaceObject);
-// EXTERNAL MODULE: ./node_modules/parse-lcov/build/index.js
-var build = __nccwpck_require__(6508);
+;// CONCATENATED MODULE: external "node:stream"
+const external_node_stream_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:stream");
+;// CONCATENATED MODULE: ./node_modules/@friedemannsommer/lcov-parser/dist/constants.mjs
+function i(){return{branchHit:"BRH",branchInstrumented:"BRF",branchLocation:"BRDA",comment:"#",endOfRecord:"end_of_record",filePath:"SF",functionExecution:"FNDA",functionHit:"FNH",functionInstrumented:"FNF",functionLocation:"FN",lineHit:"LH",lineInstrumented:"LF",lineLocation:"DA",testName:"TN",version:"VER"}}var constants_t=(n=>(n[n.None=0]="None",n[n.BranchHit=1]="BranchHit",n[n.BranchInstrumented=2]="BranchInstrumented",n[n.BranchLocation=3]="BranchLocation",n[n.Comment=4]="Comment",n[n.EndOfRecord=5]="EndOfRecord",n[n.FilePath=6]="FilePath",n[n.FunctionExecution=7]="FunctionExecution",n[n.FunctionHit=8]="FunctionHit",n[n.FunctionInstrumented=9]="FunctionInstrumented",n[n.FunctionLocation=10]="FunctionLocation",n[n.LineHit=11]="LineHit",n[n.LineInstrumented=12]="LineInstrumented",n[n.LineLocation=13]="LineLocation",n[n.TestName=14]="TestName",n[n.Version=15]="Version",n))(constants_t||{});const constants_o=Object.freeze(i());
+
+;// CONCATENATED MODULE: ./node_modules/@friedemannsommer/lcov-parser/dist/lib/field-variant.mjs
+function t(n){return n===constants_t.EndOfRecord||n===constants_t.None}function field_variant_i(n){return!t(n)}
+
+;// CONCATENATED MODULE: ./node_modules/@friedemannsommer/lcov-parser/dist/parser.mjs
+let p=class{_head=null;_tail=null;_size=0;insert(e){const t=this._tail,n={next:null,value:e};t!==null&&(t.next=n),this._head===null&&(this._head=n),this._tail=n,this._size++}remove(){const e=this._head;return e!==null?(this._head=e.next,this._size--,this._tail===e&&(this._tail=null),e.value):null}peek(){return this._head!==null?this._head.value:null}size(){return this._size}};class b{constructor(e){this._buffer=e,this.size=e.length}size;_offset=0;compare(e){return this._offset>=this.size&&(this._offset=0),this._buffer[this._offset]===e?(this._offset++,!0):!1}matched(){return this._offset===this.size}reset(){this._offset=0}}function g(i){const e=i.length,t=[];for(let n=0;n<e;n++){let s=i.charCodeAt(n);s<128?t.push(s):s<2048?t.push(s>>6|192,s&63|128):(s&64512)===55296&&n+1<e&&(i.charCodeAt(n+1)&64512)===56320?(s=65536+((s&1023)<<10)+(i.charCodeAt(++n)&1023),t.push(s>>18|240,s>>12&63|128,s>>6&63|128,s&63|128)):t.push(s>>12|224,s>>6&63|128,s&63|128)}return t}function y(i){const e=Object.keys(i),t=z(e),n=Array(t.length);for(let s=0;s<t.length;s++)n[s]=new b(g(i[e[s]]));return N(t,n)}function z(i){const e=Array(i.length);for(let t=0;t<i.length;t++)e[t]=k(i[t]);return e}function N(i,e){const t=new Map,n=e.slice().sort((r,u)=>r.size>u.size?-1:1),s=Array(i.length);for(let r=0;r<n.length;r++)t.set(n[r],r);for(let r=0;r<i.length;r++)s[t.get(e[r])]=i[r];return[s,n]}function k(i){switch(i){case"branchHit":return constants_t.BranchHit;case"branchInstrumented":return constants_t.BranchInstrumented;case"branchLocation":return constants_t.BranchLocation;case"comment":return constants_t.Comment;case"endOfRecord":return constants_t.EndOfRecord;case"filePath":return constants_t.FilePath;case"functionExecution":return constants_t.FunctionExecution;case"functionHit":return constants_t.FunctionHit;case"functionInstrumented":return constants_t.FunctionInstrumented;case"functionLocation":return constants_t.FunctionLocation;case"lineHit":return constants_t.LineHit;case"lineInstrumented":return constants_t.LineInstrumented;case"lineLocation":return constants_t.LineLocation;case"testName":return constants_t.TestName;case"version":return constants_t.Version}}class h{_buffer=null;_offset=0;_chunks=new p;_variants;_fieldNames;constructor(e){const[t,n]=y(e);this._variants=t,this._fieldNames=n}write(e){this._chunks.insert(e)}read(){if(this._buffer===null){if(this._chunks.size()===0)return h._defaultResult(!0,!1);this._buffer=this._chunks.remove()}else if(this._offset>=this._buffer.byteLength){if(this._chunks.size()===0)return h._defaultResult(!0,!1);this._buffer=this._chunks.remove(),this._offset=0}let e=this._parseResult(this._buffer);for(;e.incomplete&&this._chunks.size()!==0;)this._buffer=Buffer.concat([this._buffer.subarray(this._offset),this._chunks.remove()]),this._offset=0,e=this._parseResult(this._buffer);return e}flush(){let e=this.read();const t=[e];for(;!e.done&&!e.incomplete;)e=this.read(),t.push(e);return t}getCurrentBuffer(){return this._buffer&&this._offset<this._buffer.byteLength?this._buffer.subarray(this._offset):null}_parseResult(e){const t=e.byteLength;for(let n=this._offset;n<t;n++){const s=this._matchFields(e,n,t);if(s!==null)return s}return this._resetMatcher(),h._defaultResult(!1,!0)}_matchFields(e,t,n){const s=e[t];for(let r=0;r<this._fieldNames.length;r++){const u=this._fieldNames[r];if(u.compare(s)&&u.matched()){const a=this._variants[r],f=field_variant_i(a),c=a===constants_t.Comment;if(f&&!c&&t+1<n&&e[t+1]!==58)continue;const o=f?h._parseValue(e,t+1,c):null;let _=null;if(o!==null)this._offset=o.lastIndex+1,_=o.value;else if(!f){const d=h._seekNextLine(e,t+1);if(d!==-1)this._offset=d+1;else return h._defaultResult(!1,!0)}return this._resetMatcher(),{done:!1,incomplete:f&&o===null,value:_,variant:a}}}return null}_resetMatcher(){for(const e of this._fieldNames)e.reset()}static _parseValue(e,t,n){const s=e.byteLength;let r=n?t:-1;for(let u=t;u<s;u++){const a=e[u];if(!n&&a===58)r=u+1;else if(a===10)return r===-1?null:{lastIndex:u,value:h._parseSlice(e,r,u)}}return null}static _seekNextLine(e,t){const n=e.byteLength;for(let s=t;s<n;s++)if(e[s]===10)return s;return-1}static _parseSlice(e,t,n){const s=[];let r=t;for(let u=t;u<n;u++)e[u]===44&&(s.push(e.subarray(r,u).toString()),r=u+1);return s.push(e.subarray(r,n).toString()),s}static _defaultResult(e,t){return{done:e,incomplete:t,value:null,variant:constants_t.None}}}
+
+;// CONCATENATED MODULE: ./node_modules/@friedemannsommer/lcov-parser/dist/shared/lcov-parser.bca90e94.mjs
+function v(e,t,n){switch(e.variant){case constants_t.TestName:t.clear(),n.name=e.name;break;case constants_t.FilePath:n.path=e.path;break;case constants_t.EndOfRecord:return t.clear(),!0;case constants_t.FunctionLocation:case constants_t.FunctionExecution:d(t,n.functions.details,e);break;case constants_t.BranchLocation:n.branches.details.push(f(e));break;case constants_t.LineLocation:n.lines.details.push(F(e));break;case constants_t.BranchInstrumented:case constants_t.BranchHit:o(n.branches,e);break;case constants_t.FunctionInstrumented:case constants_t.FunctionHit:o(n.functions,e);break;case constants_t.LineInstrumented:case constants_t.LineHit:o(n.lines,e);break}return!1}function lcov_parser_bca90e94_m(e,t,n,i){return e===i.length&&(i[e]=lcov_parser_bca90e94_h()),v(t,n,i[e])?e+1:e}function lcov_parser_bca90e94_h(e){return{branches:{details:[],hit:0,instrumented:0},functions:{details:[],hit:0,instrumented:0},lines:{details:[],hit:0,instrumented:0},name:e?e.name:"",path:""}}function d(e,t,n){const i=e.get(n.name);if(i===void 0){const u=lcov_parser_bca90e94_p(n);e.set(n.name,u),t.push(u)}else n.variant===constants_t.FunctionExecution?i.hit+=n.hit:i.line=n.lineStart}function o(e,t){const n=t.variant;n===constants_t.BranchHit||n===constants_t.FunctionHit||n===constants_t.LineHit?e.hit+=t.hit:e.instrumented+=t.found}function f(e){return{block:e.block,branch:e.branch,hit:e.hit,isException:e.isException,line:e.line}}function lcov_parser_bca90e94_p(e){return{hit:e.variant===constants_t.FunctionExecution?e.hit:0,line:e.variant===constants_t.FunctionLocation?e.lineStart:0,name:e.name}}function F(e){return{hit:e.hit,line:e.line}}function r(e){const t=parseInt(e);return isNaN(t)?0:t}function L(e){return e>=9&&e<=13||e===32||e===133||e===160}function lcov_parser_bca90e94_b(e){if(e.incomplete)return s(e);switch(e.variant){case constants_t.None:return s(e);case constants_t.BranchHit:case constants_t.FunctionHit:case constants_t.LineHit:return lcov_parser_bca90e94_g(e);case constants_t.BranchInstrumented:case constants_t.FunctionInstrumented:case constants_t.LineInstrumented:return lcov_parser_bca90e94_k(e);case constants_t.BranchLocation:return E(e);case constants_t.EndOfRecord:return S(e);case constants_t.FilePath:return B(e);case constants_t.FunctionExecution:return H(e);case constants_t.FunctionLocation:return x(e);case constants_t.LineLocation:return I(e);case constants_t.TestName:return lcov_parser_bca90e94_N(e);case constants_t.Version:return lcov_parser_bca90e94_y(e);case constants_t.Comment:return R(e)}}function s(e){return{done:e.done,incomplete:e.incomplete,variant:constants_t.None}}function lcov_parser_bca90e94_g(e){let t=0;return e.value!==null&&e.value.length!==0&&(t=r(e.value[0])),{done:e.done,hit:t,variant:e.variant}}function lcov_parser_bca90e94_k(e){let t=0;return e.value!==null&&e.value.length!==0&&(t=r(e.value[0])),{done:e.done,found:t,variant:e.variant}}function E(e){let t=0,n="",i=!1,u=0,c=0;if(e.value!==null&&e.value.length>=4){const l=e.value[e.value.length-1];u=r(e.value[0]),i=e.value[1].startsWith("e"),t=r(i?e.value[1].slice(1):e.value[1]),n=e.value.slice(2,-1).join(","),c=l==="-"?0:r(l)}return{block:t,done:e.done,branch:n,isException:i,line:u,hit:c,variant:e.variant}}function S(e){return{done:e.done,variant:e.variant}}function B(e){let t="";return e.value!==null&&e.value.length!==0&&(t=e.value.join(",")),{done:e.done,path:t,variant:e.variant}}function H(e){let t=0,n="";return e.value!==null&&e.value.length>=2&&(t=r(e.value[0]),n=e.value[1]),{hit:t,done:e.done,name:n,variant:e.variant}}function x(e){let t=0,n=0,i="";return e.value!==null&&e.value.length>=2&&(n=r(e.value[0]),t=r(e.value[1]),i=t<n||e.value.length===2?e.value[1]:e.value.length>=3?e.value[2]:""),{done:e.done,lineEnd:t,lineStart:n,name:i,variant:e.variant}}function I(e){let t="",n=0,i=0;return e.value!==null&&e.value.length>=2&&(i=r(e.value[0]),n=r(e.value[1]),e.value.length>=3&&(t=e.value[2])),{checksum:t,done:e.done,hit:n,line:i,variant:e.variant}}function lcov_parser_bca90e94_N(e){let t="";return e.value!==null&&e.value.length!==0&&(t=e.value[0]),{done:e.done,name:t,variant:e.variant}}function lcov_parser_bca90e94_y(e){let t="";return e.value!==null&&e.value.length!==0&&(t=e.value[0]),{done:e.done,variant:e.variant,version:t}}function R(e){return{done:e.done,variant:e.variant,comment:e.value!==null?e.value.join(","):""}}
+
+;// CONCATENATED MODULE: ./node_modules/@friedemannsommer/lcov-parser/dist/promise/index.mjs
+function l(t){const e=new Map,r=[];let f=0;for(const o of t){const n=lcov_parser_bca90e94_b(o);n.variant!==constants_t.None&&(f=lcov_parser_bca90e94_m(f,n,e,r))}return r}function promise_g(t,e){const r=new Map,f=[];let o=0;return new Promise((n,u)=>{function a(s){if(typeof s=="string")t.write(Buffer.from(s));else if(Buffer.isBuffer(s))t.write(s);else{i(),u(new Error("received unsupported chunk type."));return}for(const h of t.flush()){const p=lcov_parser_bca90e94_b(h);p.variant!==constants_t.None&&(o=lcov_parser_bca90e94_m(o,p,r,f))}}function c(){i(),n(f)}function m(s){i(),u(s)}function i(){e.off("data",a),e.off("error",m),e.off("end",c)}e.on("data",a),e.once("error",m),e.once("end",c)})}function promise_d(t){const{fieldNames:e,from:r,parser:f}=t,o=f??new h(e??constants_o);return r instanceof external_node_stream_namespaceObject.Readable?promise_g(o,r):typeof r=="string"||r instanceof ArrayBuffer?(o.write(Buffer.from(r)),new Promise(n=>{n(l(o.flush()))})):Buffer.isBuffer(r)?(o.write(r),new Promise(n=>{n(l(o.flush()))})):Promise.reject(new Error("given `from` type isn't supported."))}
+
 // EXTERNAL MODULE: ./node_modules/fast-xml-parser/src/fxp.js
 var fxp = __nccwpck_require__(2603);
 ;// CONCATENATED MODULE: ./src/summary.ts
@@ -12793,9 +12612,8 @@ function coverageRecordsToSummary(records) {
     };
     for (const file of records) {
         flavors.forEach(flavor => {
-            console.log;
             if (file[flavor]) {
-                data[flavor].total += file[flavor].found ?? 0;
+                data[flavor].total += file[flavor].instrumented ?? 0;
                 data[flavor].covered += file[flavor].hit ?? 0;
             }
         });
@@ -12821,7 +12639,7 @@ function assertCoverageSummary(data, file) {
     }
 }
 async function loadLCOV(file) {
-    return coverageRecordsToSummary((0,build/* default */.ZP)(await promises_namespaceObject.readFile(file, { encoding: 'utf-8' })));
+    return coverageRecordsToSummary(await promise_d({ from: await promises_namespaceObject.readFile(file, { encoding: 'utf-8' }) }));
 }
 async function loadCobertura(file) {
     const parser = new fxp.XMLParser({
