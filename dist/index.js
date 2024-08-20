@@ -12612,8 +12612,11 @@ function coverageRecordsToSummary(records) {
     };
     for (const file of records) {
         flavors.forEach(flavor => {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             if (file[flavor]) {
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
                 data[flavor].total += file[flavor].instrumented ?? 0;
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
                 data[flavor].covered += file[flavor].hit ?? 0;
             }
         });
@@ -12737,7 +12740,9 @@ async function publishCheck(opts) {
     await octokit.rest.repos.createCommitStatus(output);
 }
 function coverageTotals(coverage, mode) {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const covered = coverage[mode]?.covered ?? 0;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const total = coverage[mode]?.total ?? 0;
     return { covered, total };
 }

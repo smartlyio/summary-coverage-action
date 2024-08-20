@@ -30,8 +30,11 @@ function coverageRecordsToSummary(records: SectionSummary[]): libCoverage.Covera
 
   for (const file of records) {
     flavors.forEach(flavor => {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (file[flavor]) {
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         data[flavor].total += file[flavor].instrumented ?? 0;
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         data[flavor].covered += file[flavor].hit ?? 0;
       }
     });

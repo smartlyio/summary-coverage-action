@@ -74,7 +74,9 @@ function coverageTotals(
   coverage: CoverageSummary,
   mode: 'statements' | 'branches' | 'functions' | 'lines'
 ) {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   const covered = coverage[mode]?.covered ?? 0;
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   const total = coverage[mode]?.total ?? 0;
   return { covered, total };
 }
