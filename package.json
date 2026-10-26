@@ -19,7 +19,7 @@
     "@actions/core": "^1.2.6",
     "@actions/github": "^5.0.0",
     "@friedemannsommer/lcov-parser": "^3.1.1",
-    "fast-xml-parser": "^4.3.5",
+    "fast-xml-parser": "^5.0.0",
     "istanbul-lib-coverage": "^3.2.2"
   },
   "devDependencies": {
